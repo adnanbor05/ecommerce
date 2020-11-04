@@ -1,0 +1,235 @@
+1. fitur kategori ditampilkan di halaman utama
+2. paggination
+
+
+
+	menu dprodown dengan database
+	<li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Catalog
+          </a>
+          
+            <?php $row=array(); ?>
+            <?php $ambil=$koneksi->query("SELECT * FROM kategori"); ?>
+            <?php while ($row = $ambil->fetch_assoc()) { ?>
+            <?php
+            echo "<option value='".$row['id_kategori']."'>".$row['kategori']."</option>";
+            ?>
+            <?php } ?>
+            <a class="dropdown-item" href="kategori.php?id=<?php ?>"><?php echo $row; ?></a>
+          </a>
+        </li>
+
+
+
+        menampilkan jumlah produk dlm kategori
+        <?php $jumlah=$koneksi->query("SELECT *, COUNT( * ) AS jumlah FROM produk GROUP BY id_kategori"); ?>
+          <?php while ($pisah = $jumlah->fetch_assoc()) { ?>
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="row">
+            <!-- TINGGAL MENAMPILKAN DATA BARANG SESUAI KATEGORI (cari idnya dulu) -->
+            
+            <?php $nkategori=$_POST["nkategori"]; ?>
+            <?php $ambil = $koneksi->query("SELECT * FROM produk JOIN kategori
+            ON produk.id_kategori=kategori.id_kategori
+            WHERE id_kategori='$nkategori'"); ?>
+            <?php foreach ($nkategori as $key => $value):?>
+
+              <div class="col-md-4">
+                <div class="thumbnail">
+                  <img src="foto produk/<?php echo $detail['foto_produk']; ?>" alt="">
+                  <div class="caption">
+                    <h3><?php echo $detail['nama_produk']; ?></h3>
+                    <h5>Rp. <?php echo number_format($detail['harga_produk']); ?></h5>
+                    <a href="beli.php?id=<?php echo $detail['id_produk']; ?>" class="btn btn-primary">Beli</a>
+                    <a href="detail.php?id=<?php echo $detail["id_produk"]; ?>" class="btn btn-default">Detail</a>
+
+                  </div>
+                </div>
+              </div>
+              <?php endforeach ?> 
+          </div>
+
+
+
+<div class="row">
+  <div class="col-4">
+    <div class="list-group" id="list-tab" role="tablist">
+      <a class="list-group-item list-group-item-action active" id="list-home-list" data-toggle="list" href="#list-home" role="tab" aria-controls="home">Home</a>
+      <a class="list-group-item list-group-item-action" id="list-profile-list" data-toggle="list" href="#list-profile" role="tab" aria-controls="profile">Profile</a>
+      <a class="list-group-item list-group-item-action" id="list-messages-list" data-toggle="list" href="#list-messages" role="tab" aria-controls="messages">Messages</a>
+      <a class="list-group-item list-group-item-action" id="list-settings-list" data-toggle="list" href="#list-settings" role="tab" aria-controls="settings">Settings</a>
+    </div>
+  </div>
+  <div class="col-8">
+    <div class="tab-content" id="nav-tabContent">
+      <div class="tab-pane fade show active" id="list-home" role="tabpanel" aria-labelledby="list-home-list">...</div>
+      <div class="tab-pane fade" id="list-profile" role="tabpanel" aria-labelledby="list-profile-list">...</div>
+      <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-messages-list">...</div>
+      <div class="tab-pane fade" id="list-settings" role="tabpanel" aria-labelledby="list-settings-list">...</div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+PAGGINATION DI KATEGORI ADMIN
+
+<?php  
+$koneksi = new mysqli("localhost","root","","toko_online_dac");
+?>
+<h2>Kategori Produk</h2>
+
+<table class="table table-hover table-bordered">
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>Nama Kategori</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- pagination -->
+    <?php $hal = 3; //batasan halaman?>
+    <?php $page = isset($_GET['hal'])? (int)$_GET["hal"]:1;?>
+    <?php $mulai = ($page>1) ? ($page * $hal) - $hal : 0;?>
+    
+    <?php $ambil=$koneksi->query("SELECT * FROM kategori"); ?>
+    <?php $total = mysqli_num_rows($ambil); ?>
+    <?php $pages = ceil($total/$hal); ?>
+    <?php $query = mysqli_query($koneksi,"SELECT * FROM kategori LIMIT $mulai, $hal"); ?>
+    <?php $nomor=$mulai+1; ?>
+    <?php while ($pecah = $query->fetch_assoc()) { ?>
+    <tr>
+      <td><?php echo $nomor++; ?></td>
+      <td><?php echo $pecah['kategori']; ?></td>
+      <td>
+        <a href="index.php?halaman=ubahkategori&id=<?php echo $pecah['id_kategori']; ?>" class="btn btn-warning"><i class="fa fa-remove"></i> Ubah</a>
+        <a href="index.php?halaman=hapuskategori&id=<?php echo $pecah['id_kategori']; ?>" class="btn-danger btn"><i class="fa fa-edit"></i> Hapus</a>
+      </td>
+    </tr>
+  
+  <?php } ?>
+  </tbody>
+</table>
+<div class="pagination-lg">
+  <!-- ada yang salah di halamannya(tampilan halaman) -->
+  <?php for ($i=1; $i<=$pages ; $i++){ ?>
+  <a href="kategori.php?halaman=<?php echo $i; ?>"><?php echo $i; ?></a>
+  <?php } ?>
+ 
+</div><br>
+<a href="index.php?halaman=tambahkategori" class="btn btn-primary">Tambah Kategori</a>
+
+
+
+
+
+
+
+
+
+
+============================================================================================================
+KATEGORI.PHP
+================
+
+<?php 
+
+include 'koneksi.php';
+
+// echo "<pre>";
+// print_r($perproduk);
+// echo "</pre>";
+?>
+<?php 
+
+include 'koneksi.php';
+?>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kategori</title>
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="bootstrap/css/style.css">
+</head>
+<body>
+  <?php include 'menu.php'; ?>
+  <br>
+  <div class="container">
+    <h3>KATEGORI PRODUK </font> </h3>
+    <br>
+    <div class="row">
+      <div class="col-3">
+        <div class="list-group" id="list-tab" role="tablist">
+
+          <!-- SUDAH BENAR -->
+          <?php $jumlah=$koneksi->query("SELECT COUNT(p.nama_produk) AS jumlah_produk, k.kategori FROM produk p LEFT JOIN kategori k ON p.id_kategori=k.id_kategori GROUP BY k.kategori"); ?>
+          <?php while ($pisah = $jumlah->fetch_assoc()) { ?>
+
+            <!-- menampilkan daftar kategori -->
+            <a class="list-group-item list-group-item-action" id="list-home-list" data-toggle="list" href="kategori.php?id=<?php echo $pisah['kategori']; ?>" role="tab" aria-controls="<?php echo $pisah['id_kategori'] ?>"><?php echo $pisah['kategori']; ?>
+            <!-- menampilkan banyak produk pada id_kategori -->
+            <span class="badge badge-primary badge-pill"><?php echo $pisah['jumlah_produk']; ?> </span>
+          </a>
+        <?php } ?>
+      </div>
+    </div>
+    <div class="col-8">
+      <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="<?php echo $pisah['id_kategori']; ?>" role="<?php echo $pisah['id_kategori'] ?>" aria-labelledby="list-home-list">
+          <div class="row">
+
+            <!-- TINGGAL MENAMPILKAN DATA BARANG SESUAI KATEGORI (cari idnya dulu) -->
+            <?php $kate = $koneksi->query("SELECT * FROM kategori");?>
+            <?php $id = @$_GET['kategori']; ?>
+            <?php $ambil = $koneksi->query("SELECT * FROM produk JOIN kategori ON produk.id_kategori=kategori.id_kategori WHERE kategori='$id'"); ?>
+            <?php while($perproduk=$ambil->fetch_assoc()) { ?>
+              <div class="col-md-4">
+                <div class="thumbnail">
+                  <img src="foto produk/<?php echo $perproduk['foto_produk']; ?>" alt="">
+                  <div class="caption">
+                    <h3><?php echo $perproduk['nama_produk']; ?></h3>
+                    <h5>Rp. <?php echo number_format($perproduk['harga_produk']); ?></h5>
+                    <a href="beli.php?id=<?php echo $perproduk['id_produk']; ?>" class="btn btn-primary">Beli</a>
+                    <a href="detail.php?id=<?php echo $perproduk["id_produk"]; ?>" class="btn btn-default">Detail</a>
+                  </div>
+                </div>
+              </div>
+            <?php } ?>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<!--   <script>
+    $('#myList a').on('click', function (e) {
+    e.preventDefault()
+    $(this).tab('show')
+    })
+  </script>
+ -->
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
